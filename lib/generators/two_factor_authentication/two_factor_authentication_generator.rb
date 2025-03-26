@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require "rails/generators"
+
 module TwoFactorAuthenticatable
   module Generators
     class TwoFactorAuthenticationGenerator < Rails::Generators::NamedBase
