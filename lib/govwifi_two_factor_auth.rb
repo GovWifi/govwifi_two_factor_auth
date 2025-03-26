@@ -34,7 +34,7 @@ module Devise
   @@delete_cookie_on_logout = false
 end
 
-module TwoFactorAuthentication
+module GovwifiTwoFactorAuth
   NEED_AUTHENTICATION = 'need_two_factor_authentication'
   REMEMBER_TFA_COOKIE_NAME = "remember_tfa"
 

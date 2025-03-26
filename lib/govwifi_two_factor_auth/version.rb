@@ -1,3 +1,3 @@
-module TwoFactorAuthentication
+module GovwifiTwoFactorAuth
   VERSION = "2.2.0".freeze
 end
