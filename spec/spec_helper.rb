@@ -1,12 +1,21 @@
 ENV["RAILS_ENV"] ||= "test"
-require File.expand_path("rails_app/config/environment.rb", __dir__)
-
+require File.expand_path("dummy/config/environment.rb", __dir__)
 require "rspec/rails"
+require "generator_spec"
+require "rails/generators"
+require "rspec/autorun"
 require "timecop"
-require "rack_session_access/capybara"
+require "capybara/rails"
+ENV["RAILS_ROOT"] = File.expand_path("../dummy")
 
-# See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+Rails.backtrace_cleaner.remove_silencers!
+
+# Load support files
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
+
 RSpec.configure do |config|
+  config.include Warden::Test::Helpers
+
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
 
@@ -14,13 +23,10 @@ RSpec.configure do |config|
 
   config.include Capybara::DSL
 
-  # Run specs in random order to surface order dependencies. If you find an
-  # order dependency and want to debug it, you can fix the order by providing
-  # the seed, which is printed after each run.
-  #     --seed 1234
-  config.order = "random"
-
   config.after(:each) { Timecop.return }
-end
 
-Dir["#{Dir.pwd}/spec/support/**/*.rb"].each { |f| require f }
+  config.mock_with :rspec
+  config.use_transactional_fixtures = true
+  config.infer_base_class_for_anonymous_controllers = false
+  config.order = "random"
+end
