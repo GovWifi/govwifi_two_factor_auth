@@ -5,13 +5,12 @@ Warden::Manager.after_authentication do |user, auth, options|
     bypass_by_cookie = actual_cookie_value == expected_cookie_value
   end
 
-  if user.respond_to?(:need_two_factor_authentication?) && !bypass_by_cookie
-    if auth.session(options[:scope])[GovwifiTwoFactorAuth::NEED_AUTHENTICATION] = user.need_two_factor_authentication?(auth.request)
-      user.send_new_otp if user.send_new_otp_after_login?
-    end
+  if user.respond_to?(:need_two_factor_authentication?) && !bypass_by_cookie && (auth.session(options[:scope])[GovwifiTwoFactorAuth::NEED_AUTHENTICATION] =
+                                                                                   user.need_two_factor_authentication?(auth.request)) && user.send_new_otp_after_login?
+    user.send_new_otp
   end
 end
 
-Warden::Manager.before_logout do |user, auth, _options|
+Warden::Manager.before_logout do |_user, auth, _options|
   auth.cookies.delete GovwifiTwoFactorAuth::REMEMBER_TFA_COOKIE_NAME if Devise.delete_cookie_on_logout
 end

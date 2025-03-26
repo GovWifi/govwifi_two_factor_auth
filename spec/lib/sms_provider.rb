@@ -1,4 +1,4 @@
-require 'ostruct'
+require "ostruct"
 
 class SMSProvider
   Message = Class.new(OpenStruct)
@@ -7,11 +7,10 @@ class SMSProvider
   self.messages = []
 
   def self.send_message(opts = {})
-    self.messages << Message.new(opts)
+    messages << Message.new(opts)
   end
 
   def self.last_message
-    self.messages.last
+    messages.last
   end
-
 end

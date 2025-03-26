@@ -1,8 +1,7 @@
 module ApplicationHelper
-
   def render_flash
-    flash.map do |name, message|
+    flash.map { |name, message|
       content_tag(:p, message, class: "flash #{name}")
-    end.join.html_safe
+    }.join.html_safe
   end
 end

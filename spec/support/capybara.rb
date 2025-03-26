@@ -1,3 +1,3 @@
-require 'capybara/rspec'
+require "capybara/rspec"
 
 Capybara.app = Dummy::Application

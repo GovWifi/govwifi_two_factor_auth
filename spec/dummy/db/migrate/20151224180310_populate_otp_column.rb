@@ -3,7 +3,7 @@ class PopulateOtpColumn < ActiveRecord::Migration[4.2]
     User.reset_column_information
 
     User.find_each do |user|
-      user.otp_secret_key = user.read_attribute('otp_secret_key')
+      user.otp_secret_key = user.read_attribute("otp_secret_key")
       user.save!
     end
   end
