@@ -10,5 +10,5 @@ module GovwifiTwoFactorAuth
   end
 end
 
-ActiveRecord::ConnectionAdapters::Table.send :include, GovwifiTwoFactorAuth::Orm::ActiveRecord::Schema
-ActiveRecord::ConnectionAdapters::TableDefinition.send :include, GovwifiTwoFactorAuth::Orm::ActiveRecord::Schema
+ActiveRecord::ConnectionAdapters::Table.include GovwifiTwoFactorAuth::Orm::ActiveRecord::Schema
+ActiveRecord::ConnectionAdapters::TableDefinition.include GovwifiTwoFactorAuth::Orm::ActiveRecord::Schema

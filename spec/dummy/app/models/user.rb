@@ -9,6 +9,6 @@ class User < ActiveRecord::Base
   end
 
   def phone_number
-    '14159341234'
+    "14159341234"
   end
 end

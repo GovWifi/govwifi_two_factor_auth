@@ -9,12 +9,12 @@ module GovwifiTwoFactorAuth
         before_action :handle_two_factor_authentication
       end
 
-      private
+    private
 
       def handle_two_factor_authentication
         unless devise_controller?
           Devise.mappings.keys.flatten.any? do |scope|
-            if signed_in?(scope) and warden.session(scope)[GovwifiTwoFactorAuth::NEED_AUTHENTICATION]
+            if signed_in?(scope) && warden.session(scope)[GovwifiTwoFactorAuth::NEED_AUTHENTICATION]
               handle_failed_second_factor(scope)
             end
           end
@@ -40,7 +40,6 @@ module GovwifiTwoFactorAuth
         change_path = "#{scope}_two_factor_authentication_path"
         send(change_path)
       end
-
     end
   end
 end

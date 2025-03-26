@@ -1,51 +1,52 @@
-require 'spec_helper'
-include AuthenticatedModelHelper
+# frozen_string_literal: true
+
+require "spec_helper"
 
 feature "User of two factor authentication" do
-  context 'sending two factor authentication code via SMS' do
-    shared_examples 'sends and authenticates code' do |user, type|
+  include AuthenticatedModelHelper
+
+  context "sending two factor authentication code via SMS" do
+    shared_examples "sends and authenticates code" do |type|
       before do
-        user.reload
-        if type == 'encrypted'
-          allow(User).to receive(:has_one_time_password).with(encrypted: true)
-        end
+        @user = create_user(type)
+        allow(User).to receive(:has_one_time_password).with(encrypted: true) if type == "encrypted"
       end
 
-      it 'does not send an SMS before the user has signed in' do
-        expect(SMSProvider.messages).to be_empty
+      it "does not send an SMS before the user has signed in" do
+        expect(SmsProvider.messages).to be_empty
       end
 
-      it 'sends code via SMS after sign in' do
+      it "sends code via SMS after sign in" do
         visit new_user_session_path
-        complete_sign_in_form_for(user)
+        complete_sign_in_form_for(@user)
 
-        expect(page).to have_content 'Enter the code that was sent to you'
+        expect(page).to have_content "Enter the code that was sent to you"
 
-        expect(SMSProvider.messages.size).to eq(1)
-        message = SMSProvider.last_message
-        expect(message.to).to eq(user.phone_number)
-        expect(message.body).to eq(user.reload.direct_otp)
+        expect(SmsProvider.messages.size).to eq(1)
+        message = SmsProvider.last_message
+        expect(message.to).to eq(@user.phone_number)
+        expect(message.body).to eq(@user.reload.direct_otp)
       end
 
-      it 'authenticates a valid OTP code' do
+      it "authenticates a valid OTP code" do
         visit new_user_session_path
-        complete_sign_in_form_for(user)
+        complete_sign_in_form_for(@user)
 
-        expect(page).to have_content('You are signed in as Marissa')
+        expect(page).to have_content("You are signed in as Marissa")
 
-        fill_in 'code', with: SMSProvider.last_message.body
-        click_button 'Submit'
+        fill_in "code", with: SmsProvider.last_message.body
+        click_button "Submit"
 
-        within('.flash.notice') do
-          expect(page).to have_content('Two factor authentication successful.')
+        within(".flash.notice") do
+          expect(page).to have_content("Two factor authentication successful.")
         end
 
         expect(current_path).to eq root_path
       end
     end
 
-    it_behaves_like 'sends and authenticates code', create_user('not_encrypted')
-    it_behaves_like 'sends and authenticates code', create_user, 'encrypted'
+    it_behaves_like "sends and authenticates code", "not_encrypted"
+    it_behaves_like "sends and authenticates code", "encrypted"
   end
 
   scenario "must be logged in" do
@@ -63,11 +64,11 @@ feature "User of two factor authentication" do
     end
 
     scenario "is redirected to TFA when path requires authentication" do
-      visit dashboard_path + "?A=param%20a&B=param%20b"
+      visit "#{dashboard_path}?A=param%20a&B=param%20b"
 
       expect(page).to_not have_content("Your Personal Dashboard")
 
-      fill_in "code", with: SMSProvider.last_message.body
+      fill_in "code", with: SmsProvider.last_message.body
       click_button "Submit"
 
       expect(page).to have_content("Your Personal Dashboard")
@@ -136,46 +137,46 @@ feature "User of two factor authentication" do
         expect(page).to have_content("Enter the code that was sent to you")
       end
 
-      scenario 'TFA should be different for different users' do
+      scenario "TFA should be different for different users" do
         sms_sign_in
 
-        tfa_cookie1 = get_tfa_cookie()
+        tfa_cookie1 = get_tfa_cookie
 
         logout
         reset_session!
 
-        user2 = create_user()
+        user2 = create_user
         login_as(user2)
         sms_sign_in
 
-        tfa_cookie2 = get_tfa_cookie()
+        tfa_cookie2 = get_tfa_cookie
 
         expect(tfa_cookie1).not_to eq tfa_cookie2
       end
 
       def sms_sign_in
-        SMSProvider.messages.clear()
+        SmsProvider.messages.clear
         visit user_two_factor_authentication_path
-        fill_in 'code', with: SMSProvider.last_message.body
-        click_button 'Submit'
+        fill_in "code", with: SmsProvider.last_message.body
+        click_button "Submit"
       end
 
-      scenario 'TFA should be unique for specific user' do
+      scenario "TFA should be unique for specific user" do
         sms_sign_in
 
-        tfa_cookie1 = get_tfa_cookie()
+        tfa_cookie1 = get_tfa_cookie
 
         logout
         reset_session!
 
-        user2 = create_user()
+        user2 = create_user
         set_tfa_cookie(tfa_cookie1)
         login_as(user2)
         visit dashboard_path
         expect(page).to have_content("Enter the code that was sent to you")
       end
 
-      scenario 'Delete cookie when user logs out if enabled' do
+      scenario "Delete cookie when user logs out if enabled" do
         user.class.delete_cookie_on_logout = true
 
         login_as user
@@ -188,50 +189,51 @@ feature "User of two factor authentication" do
       end
     end
 
-    it 'sets the warden session need_two_factor_authentication key to true' do
-      session_hash = { 'need_two_factor_authentication' => true }
+    it "Redirects to the 2fa page" do
+      visit "#{dashboard_path}?A=param%20a&B=param%20b"
 
-      expect(page.get_rack_session_key('warden.user.user.session')).to eq session_hash
+      expect(page).to have_content("You are signed in")
+      expect(page).to have_content("Enter the code")
     end
   end
 
-  describe 'signing in' do
+  describe "signing in" do
     let(:user) { create_user }
     let(:admin) { create_admin }
 
-    scenario 'user signs is' do
+    scenario "user signs is" do
       visit new_user_session_path
       complete_sign_in_form_for(user)
 
-      expect(page).to have_content('Signed in successfully.')
+      expect(page).to have_content("Signed in successfully.")
     end
 
-    scenario 'admin signs in' do
+    scenario "admin signs in" do
       visit new_admin_session_path
       complete_sign_in_form_for(admin)
 
-      expect(page).to have_content('Signed in successfully.')
+      expect(page).to have_content("Signed in successfully.")
     end
   end
 
-  describe 'signing out' do
+  describe "signing out" do
     let(:user) { create_user }
     let(:admin) { create_admin }
 
-    scenario 'user signs out' do
+    scenario "user signs out" do
       visit new_user_session_path
       complete_sign_in_form_for(user)
       visit destroy_user_session_path
 
-      expect(page).to have_content('Signed out successfully.')
+      expect(page).to have_content("Signed out successfully.")
     end
 
-    scenario 'admin signs out' do
+    scenario "admin signs out" do
       visit new_admin_session_path
       complete_sign_in_form_for(admin)
       visit destroy_admin_session_path
 
-      expect(page).to have_content('Signed out successfully.')
+      expect(page).to have_content("Signed out successfully.")
     end
   end
 end

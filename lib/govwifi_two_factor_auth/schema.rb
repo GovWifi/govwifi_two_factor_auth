@@ -1,7 +1,7 @@
 module GovwifiTwoFactorAuth
   module Schema
     def second_factor_attempts_count
-      apply_devise_schema :second_factor_attempts_count, Integer, :default => 0
+      apply_devise_schema :second_factor_attempts_count, Integer, default: 0
     end
 
     def encrypted_otp_secret_key

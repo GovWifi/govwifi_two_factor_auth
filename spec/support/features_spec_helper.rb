@@ -1,25 +1,25 @@
-require 'warden'
+require "warden"
 
 module FeaturesSpecHelper
   def warden
-    request.env['warden']
+    request.env["warden"]
   end
 
   def complete_sign_in_form_for(user)
     fill_in "Email", with: user.email
-    fill_in "Password", with: 'password'
-    find('.actions input').click # 'Sign in' or 'Log in'
+    fill_in "Password", with: "password"
+    find(".actions input").click # 'Sign in' or 'Log in'
   end
 
-  def set_cookie key, value
-    page.driver.browser.set_cookie [key, value].join('=')
+  def set_cookie(key, value)
+    page.driver.browser.set_cookie [key, value].join("=")
   end
 
-  def get_cookie key
+  def get_cookie(key)
     Capybara.current_session.driver.request.cookies[key]
   end
 
-  def set_tfa_cookie value
+  def set_tfa_cookie(value)
     set_cookie GovwifiTwoFactorAuth::REMEMBER_TFA_COOKIE_NAME, value
   end
 

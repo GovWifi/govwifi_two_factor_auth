@@ -1,9 +1,9 @@
 ENV["RAILS_ENV"] ||= "test"
-require File.expand_path("../rails_app/config/environment.rb",  __FILE__)
+require File.expand_path("rails_app/config/environment.rb", __dir__)
 
-require 'rspec/rails'
-require 'timecop'
-require 'rack_session_access/capybara'
+require "rspec/rails"
+require "timecop"
+require "rack_session_access/capybara"
 
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
@@ -18,9 +18,9 @@ RSpec.configure do |config|
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.
   #     --seed 1234
-  config.order = 'random'
+  config.order = "random"
 
   config.after(:each) { Timecop.return }
 end
 
-Dir["#{Dir.pwd}/spec/support/**/*.rb"].each {|f| require f}
+Dir["#{Dir.pwd}/spec/support/**/*.rb"].each { |f| require f }

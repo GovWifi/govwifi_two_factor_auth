@@ -1,5 +1,5 @@
 module ControllerHelper
-  def sign_in(user = create_user('not_encrypted'))
+  def sign_in(user = create_user("not_encrypted"))
     allow(warden).to receive(:authenticated?).with(:user).and_return(true)
     allow(controller).to receive(:current_user).and_return(user)
     warden.session(:user)[GovwifiTwoFactorAuth::NEED_AUTHENTICATION] = true
@@ -11,6 +11,6 @@ RSpec.configure do |config|
   config.include ControllerHelper, type: :controller
 
   config.before(:example, type: :controller) do
-    @request.env['devise.mapping'] = Devise.mappings[:user]
+    @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 end

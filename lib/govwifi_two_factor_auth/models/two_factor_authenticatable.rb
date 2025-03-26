@@ -1,6 +1,8 @@
-require 'two_factor_authentication/hooks/two_factor_authenticatable'
-require 'rotp'
-require 'encryptor'
+# frozen_string_literal: true
+
+require "govwifi_two_factor_auth/hooks/two_factor_authenticatable"
+require "rotp"
+require "encryptor"
 
 module Devise
   module Models
@@ -24,11 +26,13 @@ module Devise
         def authenticate_otp(code, options = {})
           return true if direct_otp && authenticate_direct_otp(code)
           return true if totp_enabled? && authenticate_totp(code, options)
+
           false
         end
 
         def authenticate_direct_otp(code)
           return false if direct_otp.nil? || direct_otp != code || direct_otp_expired?
+
           clear_direct_otp
           true
         end
@@ -38,12 +42,14 @@ module Devise
           digits = options[:otp_length] || self.class.otp_length
           drift = options[:drift] || self.class.allowed_otp_drift_seconds
           raise "authenticate_totp called with no otp_secret_key set" if totp_secret.nil?
+
           totp = ROTP::TOTP.new(totp_secret, digits: digits)
           new_timestamp = totp.verify(
-            without_spaces(code), 
-            drift_ahead: drift, drift_behind: drift, after: totp_timestamp
+            without_spaces(code),
+            drift_ahead: drift, drift_behind: drift, after: totp_timestamp,
           )
           return false unless new_timestamp
+
           self.totp_timestamp = new_timestamp
           true
         end
@@ -52,11 +58,12 @@ module Devise
           totp_secret = options[:otp_secret_key] || otp_secret_key
           options[:digits] ||= options[:otp_length] || self.class.otp_length
           raise "provisioning_uri called with no otp_secret_key set" if totp_secret.nil?
+
           account ||= email if respond_to?(:email)
           ROTP::TOTP.new(totp_secret, options).provisioning_uri(account)
         end
 
-        def need_two_factor_authentication?(request)
+        def need_two_factor_authentication?(_request)
           true
         end
 
@@ -69,8 +76,8 @@ module Devise
           !totp_enabled?
         end
 
-        def send_two_factor_authentication_code(code)
-          raise NotImplementedError.new("No default implementation - please define in your class.")
+        def send_two_factor_authentication_code(_code)
+          raise NotImplementedError, "No default implementation - please define in your class."
         end
 
         def max_login_attempts?
@@ -85,8 +92,9 @@ module Devise
           respond_to?(:otp_secret_key) && !otp_secret_key.nil?
         end
 
-        def confirm_totp_secret(secret, code, options = {})
-          return false unless authenticate_totp(code, {otp_secret_key: secret})
+        def confirm_totp_secret(secret, code, _options = {})
+          return false unless authenticate_totp(code, { otp_secret_key: secret })
+
           self.otp_secret_key = secret
           true
         end
@@ -103,18 +111,18 @@ module Devise
           digits = options[:length] || self.class.direct_otp_length || 6
           update_attributes(
             direct_otp: random_base10(digits),
-            direct_otp_sent_at: Time.now.utc
+            direct_otp_sent_at: Time.now.utc,
           )
         end
 
-        private
+      private
 
         def without_spaces(code)
-          code.gsub(/\s/, '')
+          code.gsub(/\s/, "")
         end
 
         def random_base10(digits)
-          SecureRandom.random_number(10**digits).to_s.rjust(digits, '0')
+          SecureRandom.random_number(10**digits).to_s.rjust(digits, "0")
         end
 
         def direct_otp_expired?
@@ -135,12 +143,12 @@ module Devise
           self.encrypted_otp_secret_key = otp_encrypt(value)
         end
 
-        private
+      private
 
         def otp_decrypt(encrypted_value)
           return encrypted_value if encrypted_value.blank?
 
-          encrypted_value = encrypted_value.unpack('m').first
+          encrypted_value = encrypted_value.unpack1("m")
 
           value = ::Encryptor.decrypt(encryption_options_for(encrypted_value))
 
@@ -158,9 +166,7 @@ module Devise
           value = value.to_s
           encrypted_value = ::Encryptor.encrypt(encryption_options_for(value))
 
-          encrypted_value = [encrypted_value].pack('m')
-
-          encrypted_value
+          [encrypted_value].pack("m")
         end
 
         def encryption_options_for(value)
@@ -169,36 +175,36 @@ module Devise
             key: Devise.otp_secret_encryption_key,
             iv: iv_for_attribute,
             salt: salt_for_attribute,
-            algorithm: 'aes-256-cbc'
+            algorithm: "aes-256-cbc",
           }
         end
 
-        def iv_for_attribute(algorithm = 'aes-256-cbc')
+        def iv_for_attribute(algorithm = "aes-256-cbc")
           iv = encrypted_otp_secret_key_iv
 
           if iv.nil?
             algo = OpenSSL::Cipher.new(algorithm)
-            iv = [algo.random_iv].pack('m')
+            iv = [algo.random_iv].pack("m")
             self.encrypted_otp_secret_key_iv = iv
           end
 
-          iv.unpack('m').first if iv.present?
+          iv.unpack1("m") if iv.present?
         end
 
         def salt_for_attribute
           salt = encrypted_otp_secret_key_salt ||
-                 self.encrypted_otp_secret_key_salt = generate_random_base64_encoded_salt
+            self.encrypted_otp_secret_key_salt = generate_random_base64_encoded_salt
 
           decode_salt_if_encoded(salt)
         end
 
         def generate_random_base64_encoded_salt
-          prefix = '_'
-          prefix + [SecureRandom.random_bytes].pack('m')
+          prefix = "_"
+          prefix + [SecureRandom.random_bytes].pack("m")
         end
 
         def decode_salt_if_encoded(salt)
-          salt.slice(0).eql?('_') ? salt.slice(1..-1).unpack('m').first : salt
+          salt.slice(0).eql?("_") ? salt.slice(1..-1).unpack1("m") : salt
         end
       end
     end

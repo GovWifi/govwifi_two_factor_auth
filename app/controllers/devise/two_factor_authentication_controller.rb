@@ -1,11 +1,10 @@
-require 'devise/version'
+require "devise/version"
 
 class Devise::TwoFactorAuthenticationController < DeviseController
   prepend_before_action :authenticate_scope!
   before_action :prepare_and_validate, :handle_two_factor_authentication
 
-  def show
-  end
+  def show; end
 
   def update
     render :show and return if params[:code].nil?
@@ -19,10 +18,10 @@ class Devise::TwoFactorAuthenticationController < DeviseController
 
   def resend_code
     resource.send_new_otp
-    redirect_to send("#{resource_name}_two_factor_authentication_path"), notice: I18n.t('devise.two_factor_authentication.code_has_been_sent')
+    redirect_to send("#{resource_name}_two_factor_authentication_path"), notice: I18n.t("devise.two_factor_authentication.code_has_been_sent")
   end
 
-  private
+private
 
   def after_two_factor_success_for(resource)
     set_remember_two_factor_cookie(resource)
@@ -44,15 +43,15 @@ class Devise::TwoFactorAuthenticationController < DeviseController
   def set_remember_two_factor_cookie(resource)
     expires_seconds = resource.class.remember_otp_session_for_seconds
 
-    if expires_seconds && expires_seconds > 0
+    if expires_seconds && expires_seconds.positive?
       cookies.signed[GovwifiTwoFactorAuth::REMEMBER_TFA_COOKIE_NAME] = {
-          value: "#{resource.class}-#{resource.public_send(Devise.second_factor_resource_id)}",
-          expires: expires_seconds.seconds.from_now
+        value: "#{resource.class}-#{resource.public_send(Devise.second_factor_resource_id)}",
+        expires: expires_seconds.seconds.from_now,
       }
     end
   end
 
-  def after_two_factor_success_path_for(resource)
+  def after_two_factor_success_path_for(_resource)
     stored_location_for(resource_name) || :root
   end
 
@@ -75,6 +74,7 @@ class Devise::TwoFactorAuthenticationController < DeviseController
 
   def prepare_and_validate
     redirect_to :root and return if resource.nil?
+
     @limit = resource.max_login_attempts
     if resource.max_login_attempts?
       sign_out(resource)
