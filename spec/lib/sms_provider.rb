@@ -1,6 +1,6 @@
 require "ostruct"
 
-class SMSProvider
+class SmsProvider
   Message = Class.new(OpenStruct)
 
   class_attribute :messages
