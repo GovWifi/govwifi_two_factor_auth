@@ -48,7 +48,7 @@ module Devise
   module Controllers
     module Helpers
       def is_fully_authenticated?
-        !session["warden.user.user.session"].try(:[], GovwifiTwoFactorAuth::NEED_AUTHENTICATION)
+        !session["warden.user.#{resource_name}.session"].try(:[], GovwifiTwoFactorAuth::NEED_AUTHENTICATION)
       end
     end
   end
