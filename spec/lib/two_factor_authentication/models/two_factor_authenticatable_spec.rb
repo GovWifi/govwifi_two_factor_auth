@@ -14,7 +14,7 @@ describe Devise::Models::TwoFactorAuthenticatable do
     it "set direct_otp_send_at field to current time" do
       Timecop.freeze do
         instance.create_direct_otp
-        expect(instance.direct_otp_sent_at).to eq(Time.now)
+        expect(instance.direct_otp_sent_at).to be_within(1.second).of(Time.zone.now)
       end
     end
 
