@@ -6,6 +6,7 @@ require "rails/generators"
 require "rspec/autorun"
 require "timecop"
 require "capybara/rails"
+require "support/factory_bot"
 ENV["RAILS_ROOT"] = File.expand_path("../dummy")
 
 Rails.backtrace_cleaner.remove_silencers!
