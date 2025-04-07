@@ -10,9 +10,9 @@ module Devise
       extend ActiveSupport::Concern
 
       module ClassMethods
-        def has_one_time_password(options = {})
+        def has_one_time_password
           include InstanceMethodsOnActivation
-          include EncryptionInstanceMethods if options[:encrypted] == true
+          include EncryptionInstanceMethods
         end
 
         ::Devise::Models.config(
@@ -50,7 +50,7 @@ module Devise
           )
           return false unless new_timestamp
 
-          self.totp_timestamp = new_timestamp
+          self.totp_timestamp = Time.at(new_timestamp)
           true
         end
 
