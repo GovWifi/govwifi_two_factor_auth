@@ -12,8 +12,9 @@
 <% end %>
 
 <% if resource.direct_otp %>
-  <%= link_to "Resend Code", send("resend_code_#{resource_name}_two_factor_authentication_path"), action: :get %>
+  <%= link_to "Resend Code", send("#{resource_name}_two_factor_authentication_resend_code_path"), method: :post %>
 <% else %>
-<%= link_to "Send me a code instead", send("resend_code_#{resource_name}_two_factor_authentication_path"), action: :get %>
+<%= link_to "Send me a code instead", send("#{resource_name}_two_factor_authentication_resend_code_path"), method: :post %>
 <% end %>
 <%= link_to "Sign out", send("destroy_#{resource_name}_session_path"), :method => :delete %>
+user_two_factor_authentication_resend_code
