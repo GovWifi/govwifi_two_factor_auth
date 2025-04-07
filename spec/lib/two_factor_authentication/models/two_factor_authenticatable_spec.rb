@@ -1,9 +1,9 @@
 require "spec_helper"
 
 describe Devise::Models::TwoFactorAuthenticatable do
-  describe "#create_direct_otp" do
-    let(:instance) { build_guest_user }
+  let(:instance) { create(:user) }
 
+  describe "#create_direct_otp" do
     it "set direct_otp field" do
       expect(instance.direct_otp).to be_nil
       instance.create_direct_otp
@@ -36,7 +36,6 @@ describe Devise::Models::TwoFactorAuthenticatable do
   end
 
   describe "#authenticate_direct_otp" do
-    let(:instance) { build_guest_user }
     it "fails if no direct_otp has been set" do
       expect(instance.authenticate_direct_otp("12345")).to eq(false)
     end
@@ -69,153 +68,119 @@ describe Devise::Models::TwoFactorAuthenticatable do
   end
 
   describe "#authenticate_totp" do
-    shared_examples "authenticate_totp" do |instance|
-      before :each do
-        instance.otp_secret_key = "2z6hxkdwi3uvrnpn"
-        instance.totp_timestamp = nil
-        @totp_helper = TotpHelper.new(instance.otp_secret_key, instance.class.otp_length)
-      end
-
-      def do_invoke(code, user)
-        user.authenticate_totp(code)
-      end
-
-      it "authenticates a recently created code" do
-        code = @totp_helper.totp_code
-        expect(do_invoke(code, instance)).to eq(true)
-      end
-
-      it "authenticates a code entered with a space" do
-        code = @totp_helper.totp_code.insert(3, " ")
-        expect(do_invoke(code, instance)).to eq(true)
-      end
-
-      it "does not authenticate an old code" do
-        code = @totp_helper.totp_code(1.minutes.ago.to_i)
-        expect(do_invoke(code, instance)).to eq(false)
-      end
-
-      it "prevents code reuse" do
-        code = @totp_helper.totp_code
-        expect(do_invoke(code, instance)).to eq(true)
-        expect(do_invoke(code, instance)).to eq(false)
-      end
+    let(:totp_helper) { TotpHelper.new(instance.otp_secret_key, instance.class.otp_length) }
+    before :each do
+      instance.otp_secret_key = "2z6hxkdwi3uvrnpn"
+      instance.totp_timestamp = nil
     end
 
-    it_behaves_like "authenticate_totp", GuestUser.new
-    it_behaves_like "authenticate_totp", EncryptedUser.new
-  end
-
-  describe "#send_two_factor_authentication_code" do
-    let(:instance) { build_guest_user }
-
-    it "raises an error by default" do
-      expect { instance.send_two_factor_authentication_code(123) }
-        .to raise_error(NotImplementedError)
+    def do_invoke(code, user)
+      user.authenticate_totp(code)
     end
 
-    it "is overrideable" do
-      def instance.send_two_factor_authentication_code(_code)
-        "Code sent"
-      end
-      expect(instance.send_two_factor_authentication_code(123)).to eq("Code sent")
+    it "authenticates a recently created code" do
+      code = totp_helper.totp_code
+      expect(do_invoke(code, instance)).to eq(true)
+    end
+
+    it "authenticates a code entered with a space" do
+      code = totp_helper.totp_code.insert(3, " ")
+      expect(do_invoke(code, instance)).to eq(true)
+    end
+
+    it "does not authenticate an old code" do
+      code = totp_helper.totp_code(1.minutes.ago.to_i)
+      expect(do_invoke(code, instance)).to eq(false)
+    end
+
+    it "prevents code reuse" do
+      code = totp_helper.totp_code
+      expect(do_invoke(code, instance)).to eq(true)
+      expect(do_invoke(code, instance)).to eq(false)
     end
   end
 
   describe "#provisioning_uri" do
-    shared_examples "provisioning_uri" do |instance|
-      it "fails until generate_totp_secret is called" do
-        expect { instance.provisioning_uri }.to raise_error(Exception)
-      end
+    let(:instance) { create(:user) }
 
-      describe "with secret set" do
-        before do
-          instance.email = "houdini@example.com"
-          instance.otp_secret_key = instance.generate_totp_secret
-        end
-
-        it "returns uri with user's email" do
-          expect(instance.provisioning_uri)
-            .to match(%r{otpauth://totp/houdini%40example.com\?secret=\w{32}})
-        end
-
-        it "returns uri with issuer option" do
-          expect(instance.provisioning_uri("houdini"))
-            .to match(%r{otpauth://totp/houdini\?secret=\w{32}$})
-        end
-
-        it "returns uri with issuer option" do
-          require "cgi"
-          uri = URI.parse(instance.provisioning_uri("houdini", issuer: "Magic"))
-          params = CGI.parse(uri.query)
-
-          expect(uri.scheme).to eq("otpauth")
-          expect(uri.host).to eq("totp")
-          expect(uri.path).to eq("/Magic:houdini")
-          expect(params["issuer"].shift).to eq("Magic")
-          expect(params["secret"].shift).to match(/\w{32}/)
-        end
-      end
+    it "fails until generate_totp_secret is called" do
+      expect { instance.provisioning_uri }.to raise_error(Exception)
     end
 
-    it_behaves_like "provisioning_uri", GuestUser.new
-    it_behaves_like "provisioning_uri", EncryptedUser.new
+    describe "with secret set" do
+      before do
+        instance.email = "houdini@example.com"
+        instance.otp_secret_key = instance.generate_totp_secret
+      end
+
+      it "returns uri with user's email" do
+        expect(instance.provisioning_uri)
+          .to match(%r{otpauth://totp/houdini%40example.com\?secret=\w{32}})
+      end
+
+      it "returns uri with issuer option" do
+        expect(instance.provisioning_uri("houdini"))
+          .to match(%r{otpauth://totp/houdini\?secret=\w{32}$})
+      end
+
+      it "returns uri with issuer option" do
+        require "cgi"
+        uri = URI.parse(instance.provisioning_uri("houdini", issuer: "Magic"))
+        params = CGI.parse(uri.query)
+
+        expect(uri.scheme).to eq("otpauth")
+        expect(uri.host).to eq("totp")
+        expect(uri.path).to eq("/Magic:houdini")
+        expect(params["issuer"].shift).to eq("Magic")
+        expect(params["secret"].shift).to match(/\w{32}/)
+      end
+    end
   end
 
   describe "#generate_totp_secret" do
-    shared_examples "generate_totp_secret" do |klass|
-      let(:instance) { klass.new }
+    let(:instance) { create(:user) }
 
-      it "returns a 32 character string" do
-        secret = instance.generate_totp_secret
+    it "returns a 32 character string" do
+      secret = instance.generate_totp_secret
 
-        expect(secret).to match(/\w{32}/)
-      end
+      expect(secret).to match(/\w{32}/)
     end
-
-    it_behaves_like "generate_totp_secret", GuestUser
-    it_behaves_like "generate_totp_secret", EncryptedUser
   end
 
   describe "#confirm_totp_secret" do
-    shared_examples "confirm_totp_secret" do |klass|
-      let(:instance) { klass.new }
-      let(:secret) { instance.generate_totp_secret }
-      let(:totp_helper) { TotpHelper.new(secret, instance.class.otp_length) }
+    let(:instance) { create(:user) }
+    let(:secret) { instance.generate_totp_secret }
+    let(:totp_helper) { TotpHelper.new(secret, instance.class.otp_length) }
 
-      it "populates otp_secret_key column when given correct code" do
-        instance.confirm_totp_secret(secret, totp_helper.totp_code)
+    it "populates otp_secret_key column when given correct code" do
+      instance.confirm_totp_secret(secret, totp_helper.totp_code)
 
-        expect(instance.otp_secret_key).to match(secret)
-      end
-
-      it "does not populate otp_secret_key when when given incorrect code" do
-        instance.confirm_totp_secret(secret, "123")
-        expect(instance.otp_secret_key).to be_nil
-      end
-
-      it "returns true when given correct code" do
-        expect(instance.confirm_totp_secret(secret, totp_helper.totp_code)).to be true
-      end
-
-      it "returns false when given incorrect code" do
-        expect(instance.confirm_totp_secret(secret, "123")).to be false
-      end
+      expect(instance.otp_secret_key).to match(secret)
     end
 
-    it_behaves_like "confirm_totp_secret", GuestUser
-    it_behaves_like "confirm_totp_secret", EncryptedUser
+    it "does not populate otp_secret_key when when given incorrect code" do
+      instance.confirm_totp_secret(secret, "123")
+      expect(instance.otp_secret_key).to be_nil
+    end
+
+    it "returns true when given correct code" do
+      expect(instance.confirm_totp_secret(secret, totp_helper.totp_code)).to be true
+    end
+
+    it "returns false when given incorrect code" do
+      expect(instance.confirm_totp_secret(secret, "123")).to be false
+    end
   end
 
   describe "#max_login_attempts" do
-    let(:instance) { build_guest_user }
+    let(:instance) { create(:user) }
 
     before do
-      @original_max_login_attempts = GuestUser.max_login_attempts
-      GuestUser.max_login_attempts = 3
+      @original_max_login_attempts = User.max_login_attempts
+      User.max_login_attempts = 3
     end
 
-    after { GuestUser.max_login_attempts = @original_max_login_attempts }
+    after { User.max_login_attempts = @original_max_login_attempts }
 
     it "returns class setting" do
       expect(instance.max_login_attempts).to eq(3)
@@ -242,7 +207,7 @@ describe Devise::Models::TwoFactorAuthenticatable do
 
   describe ".has_one_time_password" do
     context "when encrypted: true option is passed" do
-      let(:instance) { EncryptedUser.new }
+      let(:instance) { create(:user) }
 
       it "encrypts otp_secret_key with iv, salt, and encoding" do
         instance.otp_secret_key = "2z6hxkdwi3uvrnpn"
@@ -303,7 +268,7 @@ describe Devise::Models::TwoFactorAuthenticatable do
 
       it "varies the iv per instance" do
         instance.otp_secret_key = "testing"
-        user2 = EncryptedUser.new
+        user2 = User.new
         user2.otp_secret_key = "testing"
 
         expect(user2.encrypted_otp_secret_key_iv)
@@ -312,7 +277,7 @@ describe Devise::Models::TwoFactorAuthenticatable do
 
       it "varies the salt per instance" do
         instance.otp_secret_key = "testing"
-        user2 = EncryptedUser.new
+        user2 = User.new
         user2.otp_secret_key = "testing"
 
         expect(user2.encrypted_otp_secret_key_salt)
