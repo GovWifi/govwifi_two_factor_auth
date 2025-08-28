@@ -1,0 +1,10 @@
+Version 1.0.1
+
+Update dependent gems
+
+Version 1.0.0
+
+Fork from https://github.com/Houdini/two_factor_authentication
+Apply patches to make the gem work with Rails 7+
+Update testing framework
+
