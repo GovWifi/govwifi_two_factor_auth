@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    govwifi_two_factor_auth (1.0.1)
+    govwifi_two_factor_auth (1.0.2)
       devise
       encryptor
       rack (>= 3.2.3)

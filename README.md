@@ -291,4 +291,4 @@ to set TOTP to DISABLED for a user account:
    ```
 
 ## Changes and updates
-When you are making changes, remember to update the [update the Changelog](https://github.com/GovWifi/govwifi_two_factor_auth/blob/main/CHANGELOG) and [update the version file](https://github.com/GovWifi/govwifi_two_factor_auth/blob/main/lib/govwifi_two_factor_auth/version.rb) before committing.
+When you are making changes, remember to [update the Changelog](https://github.com/GovWifi/govwifi_two_factor_auth/blob/main/CHANGELOG) and [update the version file](https://github.com/GovWifi/govwifi_two_factor_auth/blob/main/lib/govwifi_two_factor_auth/version.rb) then run `bundle install` to update the Gemfile.lock, before committing.
