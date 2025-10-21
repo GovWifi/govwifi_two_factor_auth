@@ -30,5 +30,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop-govuk"
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "timecop"
+  spec.add_dependency "rack", ">= 3.2.3"
   spec.add_dependency "rails", ">= 7.0.2"
 end
