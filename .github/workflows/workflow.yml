@@ -1,4 +1,4 @@
-name: admin lint and test
+name: 2 Factor auth lint and test
 on:
   push:
     branches:
