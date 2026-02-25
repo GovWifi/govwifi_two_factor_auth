@@ -20,4 +20,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Lib Tests
-        run: make test-lib
+        run: make test
