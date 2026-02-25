@@ -17,6 +17,10 @@ build:
 lint: build
 	docker run -t govwifi_two_factor_auth bundle exec rubocop .
 
+lint-local: build
+	bundle exec rubocop . -A
+
+
 test: build
 	docker run -t govwifi_two_factor_auth
 
