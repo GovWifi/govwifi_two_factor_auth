@@ -1,9 +1,14 @@
 PATH
   remote: .
   specs:
-    govwifi_two_factor_auth (1.0.2)
+    govwifi_two_factor_auth (1.0.3)
+      base64
+      benchmark
+      bigdecimal
       devise
       encryptor
+      mutex_m
+      ostruct
       rack (>= 3.2.3)
       rails (>= 7.0.2)
       randexp
@@ -178,6 +183,7 @@ GEM
     nokogiri (1.19.2-x86_64-linux-musl)
       racc (~> 1.4)
     orm_adapter (0.5.0)
+    ostruct (0.6.3)
     parallel (1.27.0)
     parser (3.3.10.2)
       ast (~> 2.4.1)

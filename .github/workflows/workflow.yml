@@ -1,4 +1,4 @@
-name: admin lint and test
+name: 2 Factor auth lint and test
 on:
   push:
     branches:
@@ -8,11 +8,16 @@ on:
       - main
 
 jobs:
-  lint-and-test:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Run lint
         run: make lint
-      - name: Run tests
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Lib Tests
         run: make test

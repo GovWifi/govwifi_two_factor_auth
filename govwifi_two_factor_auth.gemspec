@@ -31,6 +31,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop-govuk"
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "timecop"
+  spec.add_dependency "base64" # required since ruby 3.4
+  spec.add_dependency "benchmark" # required since ruby 3.4
+  spec.add_dependency "bigdecimal" # required since ruby 3.4
+  spec.add_dependency "mutex_m" # required since ruby 3.4
+  spec.add_dependency "ostruct" # required since ruby 3.4
   spec.add_dependency "rack", ">= 3.2.3"
   spec.add_dependency "rails", ">= 7.0.2"
 end
