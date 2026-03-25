@@ -11,7 +11,8 @@ Gem::Specification.new do |spec|
   spec.summary     = "Devise plugin for 2FA"
   spec.description = "Devise plugin for 2FA. Fork from https://github.com/Houdini/two_factor_authentication"
   spec.license     = "MIT"
-  spec.required_ruby_version = ">= 3.1"
+  spec.required_ruby_version = ">= 3.3" # Updated to reflect the minimum supported Ruby version
+
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     Dir["{app,config,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
