@@ -35,7 +35,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "bigdecimal" # required since ruby 3.4
   spec.add_dependency "mutex_m" # required since ruby 3.4
   spec.add_dependency "ostruct" # required since ruby 3.4
-  spec.add_dependency "rack", ">= 3.2.3"
-  spec.add_dependency "rack-session", ">= 2.1.2"
+  spec.add_dependency "rack", ">= 3.2.6"
   spec.add_dependency "rails", ">= 8.1.3"
 end
