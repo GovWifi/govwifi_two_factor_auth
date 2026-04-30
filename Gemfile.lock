@@ -121,7 +121,7 @@ GEM
     diff-lcs (1.6.2)
     drb (2.2.3)
     encryptor (3.0.0)
-    erb (6.0.2)
+    erb (6.0.4)
     erubi (1.13.1)
     factory_bot (6.5.6)
       activesupport (>= 6.1.0)
@@ -355,6 +355,7 @@ DEPENDENCIES
   rubocop-govuk
   sqlite3
   timecop
+
 
 BUNDLED WITH
    2.6.9
