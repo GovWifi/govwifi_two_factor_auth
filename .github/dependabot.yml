@@ -1,8 +1,11 @@
 version: 2
 updates:
-  - package-ecosystem: bundler
-    directory: "/"
-    schedule:
-      interval: daily
-      time: "03:00"
-    open-pull-requests-limit: 10
+- package-ecosystem: bundler
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "03:00"
+  open-pull-requests-limit: 10
+  ignore:
+  # Ignore All ruby updates, as this is handled by the Ruby Updater workflow.
+  - dependency-name: "ruby"
