@@ -6,6 +6,12 @@ updates:
     interval: daily
     time: "03:00"
   open-pull-requests-limit: 10
+- package-ecosystem: docker
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "03:00"
+  open-pull-requests-limit: 10
+  ## ignore updates to the Ruby as this is handled by the ruby_updater workflow.
   ignore:
-  # Ignore All ruby updates, as this is handled by the Ruby Updater workflow.
-  - dependency-name: "ruby"
+  - dependency-name: ruby
