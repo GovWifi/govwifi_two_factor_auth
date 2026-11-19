@@ -1,4 +1,4 @@
-FROM ruby:3.4.12-alpine
+FROM ruby:3.4.13-alpine
 
 # required for certain linting tools that read files, such as erb-lint
 ENV \
